@@ -118,7 +118,7 @@ generated quantities {
   vector[J] predicted_mean_mass;
   vector[J] predicted_production_rate;
 
-  if (fabs(k_net) < 1e-8) {
+  if (abs(k_net) < 1e-8) {
     P_total_mg_m2 = r * B0_mg_m2 * horizon_day;
     P_observed_mg_m2 = r * B0_mg_m2 * max(day);
   } else {
