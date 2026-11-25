@@ -4,16 +4,16 @@
 # Installation guide: https://mc-stan.org/cmdstanr/articles/cmdstanr.html
 library(cmdstanr)
 library(posterior)
-
+library(here)
+here::i_am('R/fit_single_cohort_v2.R')
 # Set this to the directory containing the accompanying CSV and Stan files.
 # Example: project_dir <- 'C:/Users/you/Documents/cohort_model'
-project_dir <- '.'
-stopifnot(file.exists(file.path(project_dir, 'single_cohort_binned_v2.stan')),
-          file.exists(file.path(project_dir, 'single_cohort_size_counts.csv')),
-          file.exists(file.path(project_dir, 'single_cohort_truth.csv')))
-counts <- read.csv(file.path(project_dir, 'single_cohort_size_counts.csv'),
+stopifnot(file.exists(file.path(here('R/single_cohort_binned_v2.stan'))),
+          file.exists(file.path(here('data/single_cohort_size_counts.csv'))),
+          file.exists(file.path(here('data/single_cohort_truth.csv'))))
+counts <- read.csv(file.path(here('data/single_cohort_size_counts.csv')),
                    stringsAsFactors = FALSE)
-truth <- read.csv(file.path(project_dir, 'single_cohort_truth.csv'))
+truth <- read.csv(file.path(here('data/single_cohort_truth.csv')))
 
 stopifnot(all(c('taxonID','siteID','sampleID','day','area_m2',
                 'mass_bin','mass_lower_mg','mass_upper_mg','count') %in% names(counts)))
@@ -74,10 +74,10 @@ init_single_cohort <- function(chain_id) {
 if (!nzchar(cmdstanr::cmdstan_path())) {
   stop('CmdStan is not configured; run cmdstanr::install_cmdstan() first.')
 }
-model <- cmdstan_model(file.path(project_dir, 'single_cohort_binned_v2.stan'))
+model <- cmdstan_model(file.path(here('R/single_cohort_binned_v2.stan')))
 fit <- model$sample(
   data = stan_data,
-  seed = 20261106,
+  seed = 1312,
   chains = 4,
   parallel_chains = 4,
   init = init_single_cohort,
@@ -112,10 +112,20 @@ print(fit$diagnostic_summary())
 
 # Posterior distributions for production and parameters, for subsequent plots.
 write.csv(fit$summary(variables = pars),
-          file.path(project_dir, 'single_cohort_posterior_summary.csv'), row.names = FALSE)
-write.csv(recovery, file.path(project_dir, 'single_cohort_parameter_recovery.csv'),
+          file.path(here('data/model-output/single_cohort_posterior_summary.csv')), row.names = FALSE)
+write.csv(recovery, file.path(here('data/model-output/single_cohort_parameter_recovery.csv')),
           row.names = FALSE)
 write.csv(as_draws_df(fit$draws(variables = c('N0','m0_median','sdlog_m0',
                     'r','mu','sigma_patch','P_observed_mg_m2','P_total_mg_m2'))),
-          file.path(project_dir, 'single_cohort_posterior_draws.csv'), row.names = FALSE)
-fit$save_object(file = file.path(project_dir, 'single_cohort_fit.rds'))
+          file.path(here('data/model-output/single_cohort_posterior_draws.csv')), row.names = FALSE)
+fit$save_object(file = file.path(here('data/model-output/single_cohort_fit.rds')))
+
+
+
+library(stanli)
+m = stanli::stanli_model(here('R/single_cohort_binned_v2.stan'), data = stan_data, fast_math = TRUE)
+fit = stanli::sample_model(m, chains = 4, seed = 1312)
+library(brms)
+
+
+

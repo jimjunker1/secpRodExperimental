@@ -1,0 +1,16 @@
+parameter,true_value
+total_recruits_ind_m2,1500.0
+recruitment_onset_day,-10.0
+recruitment_duration_day,20.0
+recruitment_end_day,10.0
+recruitment_rate_ind_m2_day,75.0
+m0_median_mg,0.01
+sdlog_m0,0.2
+r_day_inverse,0.01
+mu_day_inverse,0.005
+sigma_patch,0.25
+area_m2,0.1
+n_replicates,5.0
+last_sample_day,330.0
+P_observed_mg_m2,128.4363718450165
+P_total_mg_m2,158.9270323790471
